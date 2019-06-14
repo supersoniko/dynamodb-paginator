@@ -1,0 +1,10 @@
+ version: 2.1
+ orbs:
+  codecov: codecov/codecov@1.0.1
+ jobs:
+   build:
+     docker:
+       - image: circleci/node:8.9.4
+     steps:
+       - checkout
+       - run: npm i && npm test && ./node_modules/.bin/codecov

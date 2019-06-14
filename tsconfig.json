@@ -18,6 +18,7 @@
   ],
   "include": [
     "./lib/*.js",
+    "./lib/*.ts",
     "./test/*.js",
   ]
 }

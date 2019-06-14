@@ -5,5 +5,5 @@ const { getPaginatedResult, decodeCursor } = paginatorFunctionFactory();
 module.exports = {
   paginatorFunctionFactory,
   getPaginatedResult,
-  decodeCursor,
+  decodeCursor
 };
