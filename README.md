@@ -20,7 +20,7 @@ const params =
   };
 const result = await dynoDB.scan(params).promise();
 
-return getPaginatedResult<IUser>(params, result, limit);
+return getPaginatedResult<IUser>(params, limit, result);
 ```
 
 # API Reference
