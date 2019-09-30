@@ -7,6 +7,13 @@
     "test": "jest --config jest.json",
     "lint": "eslint . --fix"
   },
+  "engines": {
+    "node": ">=8.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supersoniko/dynamodb-paginator.git"
+  },
   "author": "Sacha Reinert",
   "license": "MIT",
   "devDependencies": {
