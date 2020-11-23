@@ -94,6 +94,7 @@ export interface IMetaData {
   limit: number;
   hasMoreData: boolean;
   cursor: string;
+  backCursor: string;
   count: number;
 }
 
