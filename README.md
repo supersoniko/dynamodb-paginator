@@ -6,6 +6,8 @@
 
 Implementation of pagination for DynamoDB from the following article: https://hackernoon.com/guys-were-doing-pagination-wrong-f6c18a91b232
 
+**NOTE**: This pagination library only works on indexes with a range key.
+
 # Usage
 
 ```javascript
@@ -16,9 +18,14 @@ const params =
   decodeCursor(cursor)
   || {
     TableName: 'Users',
-    Limit: limit
+    Limit: limit,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {
+        ':id': '1'
+    },
   };
-const result = await dynoDB.scan(params).promise();
+
+const result = await dynoDB.query(params).promise();
 
 return getPaginatedResult<IUser>(params, limit, result);
 ```
@@ -116,7 +123,8 @@ return getPaginatedResult<IUser>(params, limit, result);
 | --- | --- | --- |
 | limit | <code>number</code> | The limit of the amount of returned items |
 | hasMoreData | <code>boolean</code> | True if not all items in the DynamoDB table were returned that match the query |
-| cursor | <code>string</code> \| <code>undefined</code> | Used for pagination if there are more items left |
+| cursor | <code>string</code> | Used for pagination if there are more items left |
+| backCursor | <code>string</code> | Used for paginating back to previous results |
 | count | <code>number</code> | The amount of items returned |
 
 <a name="PaginatedResult"></a>

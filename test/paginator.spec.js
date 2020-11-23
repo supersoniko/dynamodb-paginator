@@ -65,7 +65,7 @@ describe('DynamoDB Paginator', () => {
       ],
       meta: {
         limit,
-        cursor: 'eyJUYWJsZU5hbWUiOiJVc2VycyIsIkV4Y2x1c2l2ZVN0YXJ0S2V5Ijp7ImlkIjoyfX0=',
+        cursor: 'eyJUYWJsZU5hbWUiOiJVc2VycyIsIkV4Y2x1c2l2ZVN0YXJ0S2V5Ijp7ImlkIjoyfSwicHJldmlvdXNLZXlzIjpbeyJpZCI6Mn1dLCJiYWNrIjpmYWxzZX0=',
         hasMoreData: true,
         count: 2,
       },
@@ -92,7 +92,257 @@ describe('DynamoDB Paginator', () => {
       expect(decodedCursor).toEqual({
         TableName: 'Users',
         ExclusiveStartKey: { id: 2 },
+        back: false,
+        previousKeys: [
+          { id: 2 },
+        ],
       });
+    });
+
+    it('should decode a cursor successfully on a back navigation', () => {
+      const params = {
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '2' },
+        previousKeys: [{ id: '1', date: '2' }],
+        back: true,
+      };
+      const result = {
+        Items: [{ id: '1', date: '3' }, { id: '1', date: '4' }],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: '1', date: '4' },
+      };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+      const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor || '');
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor || '');
+
+      expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '4' },
+        previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
+        back: false,
+      });
+
+      expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        previousKeys: [],
+        back: true,
+      });
+    });
+
+    it('should decode a cursor successfully for the last result page without results', () => {
+      const params = {
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '8' },
+        previousKeys: [
+          { id: '1', date: '2' },
+          { id: '1', date: '4' },
+          { id: '1', date: '6' },
+          { id: '1', date: '8' },
+        ],
+        back: false,
+      };
+      const result = { Items: [], Count: 0, ScannedCount: 0 };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+      const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor || '');
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor || '');
+
+      expect(decodedCursor).toEqual(undefined);
+
+      expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '6' },
+        previousKeys: [
+          { id: '1', date: '2' },
+          { id: '1', date: '4' },
+          { id: '1', date: '6' },
+        ],
+        back: true,
+      });
+    });
+
+    it('should decode a cursor successfully for the last result page with results', () => {
+      const params = {
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '6' },
+        previousKeys: [
+          { id: '1', date: '2' },
+          { id: '1', date: '4' },
+          { id: '1', date: '6' },
+        ],
+        back: false,
+      };
+      const result = { Items: [{ id: '1', date: '7' }], Count: 1, ScannedCount: 1 };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+      const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor || '');
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor || '');
+
+      expect(decodedCursor).toEqual(undefined);
+
+      expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '4' },
+        previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
+        back: true,
+      });
+    });
+
+    it('should decode a cursor successfully when going back from last result page with results', () => {
+      const params = {
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '2' },
+        previousKeys: [{ id: '1', date: '2' }],
+        back: true,
+      };
+      const result = {
+        Items: [{ id: '1', date: '3' }, { id: '1', date: '4' }],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: '1', date: '4' },
+      };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+      const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor || '');
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor || '');
+
+      expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '4' },
+        previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
+        back: false,
+      });
+
+      expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        previousKeys: [],
+        back: true,
+      });
+    });
+
+    it('should decode a cursor successfully when going back from last result page without results', () => {
+      const params = {
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '6' },
+        previousKeys: [
+          { id: '1', date: '2' },
+          { id: '1', date: '4' },
+          { id: '1', date: '6' },
+        ],
+        back: true,
+      };
+      const result = {
+        Items: [{ id: '1', date: '7' }, { id: '1', date: '8' }],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: '1', date: '8' },
+      };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+      const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor || '');
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor || '');
+
+      expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '8' },
+        previousKeys: [
+          { id: '1', date: '2' },
+          { id: '1', date: '4' },
+          { id: '1', date: '6' },
+          { id: '1', date: '8' },
+        ],
+        back: false,
+      });
+
+      expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '4' },
+        previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
+        back: true,
+      });
+    });
+
+    it('should decode a cursor successfully when going back to first result', () => {
+      const params = {
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        previousKeys: [],
+        back: true,
+      };
+      const result = {
+        Items: [
+          { id: '1', meep: 'fsdfdsfasd', date: '1' },
+          { id: '1', meep: 'aap', date: '2' },
+        ],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: '1', date: '2' },
+      };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+      const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor || '');
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor || '');
+
+      expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        previousKeys: [{ id: '1', date: '2' }],
+        back: false,
+        ExclusiveStartKey: { id: '1', date: '2' },
+      });
+
+      expect(decodedBackCursor).toEqual(undefined);
     });
 
     it('should return undefined when decodeCusor is called without a LastEvaluatedKey', () => {
