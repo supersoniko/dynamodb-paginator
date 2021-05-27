@@ -4,7 +4,7 @@
  jobs:
    build:
      docker:
-       - image: circleci/node:8.9.4
+       - image: cimg/node:14.17.0
      steps:
        - checkout
        - run: npm i && npm test && ./node_modules/.bin/codecov
