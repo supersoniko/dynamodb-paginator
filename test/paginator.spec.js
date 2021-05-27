@@ -23,6 +23,23 @@ describe('DynamoDB Paginator', () => {
         },
       );
     });
+    it('should handle empty Items and an unempty LastEvaluatedKey', () => {
+      const params = { TableName: 'Users' };
+      const result = { Items: [], Count: 0, LastEvaluatedKey: 'not empty' };
+      const limit = 25;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+
+      expect(paginatedResult).toEqual({
+        data: [],
+        meta: {
+          limit,
+          cursor: undefined,
+          hasMoreData: false,
+          count: 0,
+        },
+      });
+    });
   });
 
   it('should return a paginated list with a single result', () => {
