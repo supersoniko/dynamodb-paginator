@@ -1,6 +1,6 @@
 {
   "name": "dynamodb-paginator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A library to help paginate dynamodb results into pages",
   "main": "index.js",
   "scripts": {
