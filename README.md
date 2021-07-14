@@ -40,6 +40,7 @@ If your service offers authentication, it's also wise to validate that the curso
 
 ### Cursor encryption example
 A simplified example of encrypting and decrypting the generated pagination cursor using [sodium-plus](https://www.npmjs.com/package/sodium-plus).
+
 It's recommended to encapsulate the security and pagination logic in a service, for ease of use.
 
 ```javascript
