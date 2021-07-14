@@ -1,0 +1,8 @@
+.circleci
+.eslintignore
+.eslintrc.js
+.huskyrc
+.lintstagedrc
+jest.json
+test
+wallaby.js

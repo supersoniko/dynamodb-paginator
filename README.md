@@ -46,9 +46,9 @@ It's recommended to encapsulate the security and pagination logic in a service, 
 import { SodiumPlus } from 'sodium-plus';
 import { getPaginatedResult, decodeCursor } from 'dynamodb-paginator';
 
-// Example DynamoDB Output
 const params = { TableName: 'Users' };
 const limit = 25;
+// Example DynamoDB Output
 const result = {
     Items:
         [
