@@ -11,8 +11,8 @@ Implementation of pagination for DynamoDB from the following article: https://ha
 # Usage
 
 ```typescript
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { getPaginatedResult, decodeCursor } from 'dynamodb-paginator';
+import {DocumentClient} from 'aws-sdk/clients/dynamodb';
+import {getPaginatedResult, decodeCursor} from 'dynamodb-paginator';
 
 interface User {
     id: string
@@ -21,20 +21,18 @@ interface User {
 const documentClient = new DocumentClient();
 
 const limit = 25;
-const cursor = undefined // Could be a cursor from a previous paginated result
-const params =
-  decodeCursor(cursor)
-  || {
+const queryParameters = {
     TableName: 'Users',
     Limit: limit,
     KeyConditionExpression: 'id = :id',
     ExpressionAttributeValues: {
         ':id': '1'
-    },
-  };
+    }
+}
+const cursor = undefined // Could be a cursor from a previous paginated result
+const params = decodeCursor(cursor) || queryParameters;
 
 const result = await documentClient.query(params).promise();
-
 const paginatedResult = getPaginatedResult<User>(params, limit, result);
 ```
 
