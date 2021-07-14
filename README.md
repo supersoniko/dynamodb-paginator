@@ -10,10 +10,18 @@ Implementation of pagination for DynamoDB from the following article: https://ha
 
 # Usage
 
-```javascript
+```typescript
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { getPaginatedResult, decodeCursor } from 'dynamodb-paginator';
 
+interface User {
+    id: string
+}
+
+const documentClient = new DocumentClient();
+
 const limit = 25;
+const cursor = undefined // Could be a cursor from a previous paginated result
 const params =
   decodeCursor(cursor)
   || {
@@ -25,9 +33,9 @@ const params =
     },
   };
 
-const result = await dynoDB.query(params).promise();
+const result = await documentClient.query(params).promise();
 
-return getPaginatedResult<IUser>(params, limit, result);
+const paginatedResult = getPaginatedResult<User>(params, limit, result);
 ```
 
 ## Security disclaimer
@@ -41,7 +49,7 @@ If your service offers authentication, it's also wise to validate that the curso
 ### Cursor encryption example
 A simplified example of encrypting and decrypting the generated pagination cursor using [sodium-plus](https://www.npmjs.com/package/sodium-plus).
 
-It's recommended to encapsulate the security and pagination logic in a service, for ease of use.
+It's recommended to encapsulate the secured pagination code in a service, for ease of use.
 
 ```javascript
 import { SodiumPlus } from 'sodium-plus';
