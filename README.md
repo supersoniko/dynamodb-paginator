@@ -86,8 +86,8 @@ const decrypt = ((encrypted) => {
     return JSON.parse((decrypted + decipher.final('utf8')));
 });
 
-const params = { TableName: 'Users' };
 const limit = 25;
+const params = { TableName: 'Users', Limit: limit };
 // Example DynamoDB Output
 const result = {
     Items:
@@ -109,6 +109,7 @@ console.log(decodedCursor);
 // Output:
 // {
 //     TableName: 'Users',
+//     Limit: 25,
 //     ExclusiveStartKey: {id:2},
 //     previousKeys: [{id:2}],
 //     back: false
