@@ -11,15 +11,16 @@ Implementation of pagination for DynamoDB from the following article: https://ha
 # Usage
 
 ```typescript
-import {DocumentClient} from 'aws-sdk/clients/dynamodb';
-import {getPaginatedResult, decodeCursor} from 'dynamodb-paginator';
+import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { getPaginatedResult, decodeCursor } from 'dynamodb-paginator';
 
 interface User {
     id: string
     name: string
 }
 
-const documentClient = new DocumentClient();
+const documentClient = DynamoDBDocument.from(new DynamoDB({}));
 
 const limit = 25;
 const standardQueryParams = {
@@ -37,7 +38,7 @@ const cursor = undefined
 const paginationParams = decodeCursor(cursor) || {}
 const queryParams = {...standardQueryParams, ...paginationParams}
 
-const result = await documentClient.query(queryParams).promise();
+const result = await documentClient.query(queryParams);
 
 // By default the cursors are encoded in base64, but you can supply your own encoding function
 const paginatedResult = getPaginatedResult<User>(params, limit, result);
@@ -63,13 +64,32 @@ Without encrypting the cursor, the partition and range key are also visible to t
 If your service offers authentication, it's also wise to validate that the cursor being parsed, was originally generated for that user/session. This is to prevent replay attacks.
 
 ### Cursor encryption example
-A simplified example of encrypting and decrypting the generated pagination cursor using [sodium-plus](https://www.npmjs.com/package/sodium-plus).
+A simplified example of encrypting and decrypting the generated pagination cursor.
 
 It's recommended to encapsulate the secured pagination code in a service, for ease of use.
 
 ```javascript
-import { SodiumPlus } from 'sodium-plus';
+import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
 import { getPaginatedResult, decodeCursor } from 'dynamodb-paginator';
+
+const ENC_KEY = randomBytes(32); // set random encryption key
+const IV = randomBytes(16); // set random initialisation vector
+const algorithm = 'aes-256-cbc';
+
+const encryptedEncode = ((val) => {
+    const cipher = createCipheriv(algorithm, ENC_KEY, IV);
+    let encrypted = cipher.update(JSON.stringify(val), 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+
+    return encrypted;
+});
+
+const decrypt = ((encrypted) => {
+    const decipher = createDecipheriv('aes-256-cbc', ENC_KEY, IV);
+    const decrypted = decipher.update(encrypted, 'base64', 'utf8');
+
+    return JSON.parse((decrypted + decipher.final('utf8')));
+});
 
 const params = { TableName: 'Users' };
 const limit = 25;
@@ -84,25 +104,19 @@ const result = {
     LastEvaluatedKey: { id: 2 },
 };
 
-// Simplified encryption example (without back cursor encryption)
-(async function() {
-    const sodium = await SodiumPlus.auto();
+// Pass a custom encoding function
+const paginatedResult = getPaginatedResult(params, limit, result, encryptedEncode);
 
-    const key = await sodium.crypto_secretbox_keygen();
-    const nonce = await sodium.randombytes_buf(24);
+// Pass a custom decoding function
+const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decrypt)
 
-    // Generating and encrypting the cursor
-    const paginatedResult = getPaginatedResult(params, limit, result);
-    const encryptedCursor = await sodium.crypto_secretbox(paginatedResult.meta.cursor, nonce, key);
-    const base64EncryptedCursor = encryptedCursor.toString('base64')
-
-    // Decrypting and decoding the cursor
-    const decryptedCursor = await sodium.crypto_secretbox_open(Buffer.from(base64EncryptedCursor, 'base64'), nonce, key);
-
-    const decodedCursor = decodeCursor(decryptedCursor.toString());
-
-    console.log('DynamoDB Query Parameters', decodedCursor)
-})();
+console.log(decodedCursor)
+// Output:
+// {
+//     ExclusiveStartKey:{id:2},
+//     previousKeys:[{id:2}],
+//     back:false
+// }
 ```
 
 # API Reference

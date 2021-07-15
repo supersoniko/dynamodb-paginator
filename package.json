@@ -3,12 +3,13 @@
   "version": "1.0.9",
   "description": "A library to help paginate dynamodb results into pages",
   "main": "index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "test": "jest --config jest.json",
     "lint": "eslint . --fix"
   },
   "engines": {
-    "node": ">=8.6.0"
+    "node": ">= 12"
   },
   "repository": {
     "type": "git",
