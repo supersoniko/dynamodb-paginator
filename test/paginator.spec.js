@@ -40,52 +40,86 @@ describe('DynamoDB Paginator', () => {
         },
       });
     });
-  });
 
-  it('should return a paginated list with a single result', () => {
-    const params = { TableName: 'Users' };
-    const result = { Items: [{ name: 'aap' }], Count: 1 };
-    const limit = 25;
+    it('should return a paginated list with a single result', () => {
+      const params = { TableName: 'Users' };
+      const result = { Items: [{ name: 'aap' }], Count: 1 };
+      const limit = 25;
 
-    const paginatedResult = getPaginatedResult(params, limit, result);
+      const paginatedResult = getPaginatedResult(params, limit, result);
 
-    expect(paginatedResult).toEqual({
-      data: [{ name: 'aap' }],
-      meta: {
-        limit,
-        cursor: undefined,
-        hasMoreData: false,
-        count: 1,
-      },
+      expect(paginatedResult).toEqual({
+        data: [{ name: 'aap' }],
+        meta: {
+          limit,
+          cursor: undefined,
+          hasMoreData: false,
+          count: 1,
+        },
+      });
     });
-  });
 
-  it('should return a paginated list which has more pages left', () => {
-    const params = { TableName: 'Users' };
-    const result = {
-      Items:
-        [
+    it('should return a paginated list which has more pages left', () => {
+      const params = { TableName: 'Users' };
+      const result = {
+        Items:
+            [
+              { id: 1, email: 'a@aap.be' },
+              { id: 2, email: 'b@aap.be' },
+            ],
+        Count: 2,
+        LastEvaluatedKey: { id: 2 },
+      };
+      const limit = 25;
+
+      const paginatedResult = getPaginatedResult(params, limit, result);
+
+      expect(paginatedResult).toEqual({
+        data: [
           { id: 1, email: 'a@aap.be' },
           { id: 2, email: 'b@aap.be' },
         ],
-      Count: 2,
-      LastEvaluatedKey: { id: 2 },
-    };
-    const limit = 25;
+        meta: {
+          limit,
+          cursor: 'eyJFeGNsdXNpdmVTdGFydEtleSI6eyJpZCI6Mn0sInByZXZpb3VzS2V5cyI6W3siaWQiOjJ9XSwiYmFjayI6ZmFsc2V9',
+          hasMoreData: true,
+          count: 2,
+        },
+      });
+    });
 
-    const paginatedResult = getPaginatedResult(params, limit, result);
+    it('should return a paginated list which has more pages left with a custom encoding function', () => {
+      const params = { TableName: 'Users' };
+      const result = {
+        Items:
+            [
+              { id: 1, email: 'a@aap.be' },
+              { id: 2, email: 'b@aap.be' },
+            ],
+        Count: 2,
+        LastEvaluatedKey: { id: 2 },
+      };
+      const limit = 25;
 
-    expect(paginatedResult).toEqual({
-      data: [
-        { id: 1, email: 'a@aap.be' },
-        { id: 2, email: 'b@aap.be' },
-      ],
-      meta: {
-        limit,
-        cursor: 'eyJFeGNsdXNpdmVTdGFydEtleSI6eyJpZCI6Mn0sInByZXZpb3VzS2V5cyI6W3siaWQiOjJ9XSwiYmFjayI6ZmFsc2V9',
-        hasMoreData: true,
-        count: 2,
-      },
+      /**
+       * @param {any} cursor
+       */
+      const encode = cursor => Buffer.from(JSON.stringify(cursor)).toString('hex').slice(0, 12);
+
+      const paginatedResult = getPaginatedResult(params, limit, result, encode);
+
+      expect(paginatedResult).toEqual({
+        data: [
+          { id: 1, email: 'a@aap.be' },
+          { id: 2, email: 'b@aap.be' },
+        ],
+        meta: {
+          limit,
+          cursor: '7b224578636c',
+          hasMoreData: true,
+          count: 2,
+        },
+      });
     });
   });
 
@@ -334,6 +368,49 @@ describe('DynamoDB Paginator', () => {
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor);
 
       expect(decodedCursor).toEqual(undefined);
+    });
+    it('should decode a cursor successfully when going back from last result page with results and a custom encoding function', () => {
+      const params = {
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
+        ExclusiveStartKey: { id: '1', date: '2' },
+        previousKeys: [{ id: '1', date: '2' }],
+        back: true,
+      };
+      const result = {
+        Items: [{ id: '1', date: '3' }, { id: '1', date: '4' }],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: '1', date: '4' },
+      };
+
+      const limit = 2;
+
+      /**
+       * @param {any} cursor
+       */
+      const encode = cursor => Buffer.from(JSON.stringify(cursor)).toString('hex');
+      /**
+       * @param {string} encodedCursor
+       */
+      const decode = encodedCursor => JSON.parse(Buffer.from(encodedCursor, 'hex').toString());
+
+      const paginatedResult = getPaginatedResult(params, limit, result, encode);
+      const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor, decode);
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decode);
+
+      expect(decodedCursor).toEqual({
+        ExclusiveStartKey: { id: '1', date: '4' },
+        previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
+        back: false,
+      });
+
+      expect(decodedBackCursor).toEqual({
+        previousKeys: [],
+        back: true,
+      });
     });
   });
 });

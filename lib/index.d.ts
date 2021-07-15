@@ -1,4 +1,4 @@
-export interface IDynamoDBParams {
+export interface DynamoDBParams {
   /**
    * The name of the table containing the requested items; or, if you provide IndexName, the name of the table to which that index belongs.
    */
@@ -62,7 +62,7 @@ export interface IDynamoDBParams {
   ConsistentRead?: boolean;
 }
 
-export interface IDynamoDBResult {
+export interface DynamoDBResult {
   /**
    * An array of item attributes that match the scan criteria. Each element in this array consists of an attribute name and the value for that attribute.
    */
@@ -85,18 +85,18 @@ export interface IDynamoDBResult {
   ConsumedCapacity?: any;
 }
 
-export interface ICursor {
+export interface Cursor {
   ExclusiveStartKey: any;
   previousKeys?: any[]
-  back?: boolean
+  back: boolean
 }
 
-export interface IPaginatedResult<T> {
+export interface PaginatedResult<T> {
   data: T[];
-  meta: IMetaData;
+  meta: MetaData;
 }
 
-export interface IMetaData {
+export interface MetaData {
   limit: number;
   hasMoreData: boolean;
   cursor: string;
@@ -104,11 +104,14 @@ export interface IMetaData {
   count: number;
 }
 
-export interface IPaginator {
-  getPaginatedResult<T>(params: IDynamoDBParams, limit: number, result: IDynamoDBResult): IPaginatedResult<T>;
-  decodeCursor(cursor: string): ICursor;
+export interface Paginator {
+  getPaginatedResult<T>(params: DynamoDBParams, limit: number, result: DynamoDBResult): PaginatedResult<T>;
+  decodeCursor(cursor: string): Cursor;
 }
 
-export function paginatorFunctionFactory(): IPaginator;
-export function getPaginatedResult<T>(params: IDynamoDBParams, limit: number, result: IDynamoDBResult): IPaginatedResult<T>;
-export function decodeCursor(encodedCursor: string): IDynamoDBParams;
+export type CursorEncodingFunction = (cursor: Cursor) => string
+export type CursorDecodingFunction = (encodedCursor: string) => Cursor
+
+export function paginatorFunctionFactory(): Paginator;
+export function getPaginatedResult<T>(params: DynamoDBParams, limit: number, result: DynamoDBResult, cursorEncodingFunction?: CursorEncodingFunction): PaginatedResult<T>;
+export function decodeCursor(encodedCursor: string, cursorDecodingFunction?: CursorDecodingFunction): DynamoDBParams;

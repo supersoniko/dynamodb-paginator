@@ -16,6 +16,7 @@ import {getPaginatedResult, decodeCursor} from 'dynamodb-paginator';
 
 interface User {
     id: string
+    name: string
 }
 
 const documentClient = new DocumentClient();
@@ -32,12 +33,25 @@ const standardQueryParams = {
 // Could be a cursor from a previous paginated result
 const cursor = undefined
 
-// As of version 2.x.x this does not return the whole query params object
+// As of version 2.x.x decodeCursor does not return the whole query params object
 const paginationParams = decodeCursor(cursor) || {}
 const queryParams = {...standardQueryParams, ...paginationParams}
 
 const result = await documentClient.query(queryParams).promise();
+
+// By default the cursors are encoded in base64, but you can supply your own encoding function
 const paginatedResult = getPaginatedResult<User>(params, limit, result);
+// Output:
+// {
+//     data: [];
+//     meta: {
+//         limit: number;
+//         hasMoreData: boolean;
+//         cursor: string;
+//         backCursor: string;
+//         count: number;
+//     };
+// }
 ```
 
 ## Security disclaimer
@@ -96,9 +110,9 @@ const result = {
 ## Functions
 
 <dl>
-<dt><a href="#getPaginatedResult">getPaginatedResult(params, limit, result)</a> ⇒ <code>PaginatedResult&lt;T&gt;</code></dt>
+<dt><a href="#getPaginatedResult">getPaginatedResult(params, limit, result, cursorEncodingFunction)</a> ⇒ <code>PaginatedResult&lt;T&gt;</code></dt>
 <dd></dd>
-<dt><a href="#decodeCursor">decodeCursor(cursor)</a> ⇒ <code>DynamoDBParams</code> | <code>undefined</code></dt>
+<dt><a href="#decodeCursor">decodeCursor(encodedCursor, cursorDecodingFunction)</a> ⇒ <code>DynamoDBParams</code> | <code>undefined</code></dt>
 <dd></dd>
 </dl>
 
@@ -127,6 +141,7 @@ const result = {
 | params | [<code>DynamoDBParams</code>](#DynamoDBParams) |
 | limit | <code>number</code> |
 | result | [<code>DynamoDBResult</code>](#DynamoDBResult) |
+| cursorEncodingFunction? | <code>(cursor: [Cursor](#Cursor)) => string</code> |
 
 <a name="decodeCursor"></a>
 
@@ -136,6 +151,7 @@ const result = {
 | Param | Type |
 | --- | --- |
 | encodedCursor| <code>string</code> |
+| cursorDecodingFunction? | <code>(encodedCursor: string) => [Cursor](#Cursor)</code> |
 
 <a name="DynamoDBParams"></a>
 
@@ -187,7 +203,7 @@ const result = {
 | limit | <code>number</code> | The limit of the amount of returned items |
 | hasMoreData | <code>boolean</code> | True if not all items in the DynamoDB table were returned that match the query |
 | cursor | <code>string</code> | Used for pagination if there are more items left |
-| backCursor | <code>string</code> | Used for paginating back to previous results |
+| backCursor? | <code>string</code> | Used for paginating back to previous results |
 | count | <code>number</code> | The amount of items returned |
 
 <a name="PaginatedResult"></a>
@@ -208,7 +224,7 @@ const result = {
 | Name | Type | Description |
 | --- | --- | --- |
 | ExclusiveStartKey | <code>any</code> | Start key for navigating DynamoDB queries |
-| previousKeys | <code>any[]</code> | Previous used ExclusiveStartKeys to navigate back to |
+| previousKeys? | <code>any[]</code> | Previous used ExclusiveStartKeys to navigate back to |
 | back | <code>boolean</code> | To indicate wether it's a cursor used for forward or backwards navigation |
 
 <a name="Cursor"></a>
