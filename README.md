@@ -4,12 +4,10 @@
 ![CircleCI](https://img.shields.io/circleci/build/github/supersoniko/dynamodb-paginator.svg)
 [![codecov](https://codecov.io/gh/supersoniko/dynamodb-paginator/branch/master/graph/badge.svg)](https://codecov.io/gh/supersoniko/dynamodb-paginator)
 
-Implementation of pagination for DynamoDB from the following article: https://hackernoon.com/guys-were-doing-pagination-wrong-f6c18a91b232
-
 **NOTE**: This pagination library only works on indexes with a range key.
 
 # Usage
-
+Compatible with AWS SDK v2 and v3
 ```typescript
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
@@ -44,7 +42,7 @@ const result = await documentClient.query(queryParams);
 const paginatedResult = getPaginatedResult<User>(params, limit, result);
 // Output:
 // {
-//     data: [],
+//     data: T[],
 //     meta: {
 //         limit: number,
 //         hasMoreData: boolean,
