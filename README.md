@@ -21,7 +21,7 @@ interface User {
 const documentClient = new DocumentClient();
 
 const limit = 25;
-const queryParameters = {
+const standardQueryParams = {
     TableName: 'Users',
     Limit: limit,
     KeyConditionExpression: 'id = :id',
@@ -29,10 +29,14 @@ const queryParameters = {
         ':id': '1'
     }
 }
-const cursor = undefined // Could be a cursor from a previous paginated result
-const params = decodeCursor(cursor) || queryParameters;
+// Could be a cursor from a previous paginated result
+const cursor = undefined
 
-const result = await documentClient.query(params).promise();
+// As of version 2.x.x this does not return the whole query params object
+const paginationParams = decodeCursor(cursor) || {}
+const queryParams = {...standardQueryParams, ...paginationParams}
+
+const result = await documentClient.query(queryParams).promise();
 const paginatedResult = getPaginatedResult<User>(params, limit, result);
 ```
 
@@ -109,6 +113,8 @@ const result = {
 <dd></dd>
 <dt><a href="#PaginatedResult">PaginatedResult</a> : <code>Object</code></dt>
 <dd></dd>
+<dt><a href="#Cursor">Cursor</a> : <code>Object</code></dt>
+<dd></dd>
 </dl>
 
 <a name="getPaginatedResult"></a>
@@ -124,12 +130,12 @@ const result = {
 
 <a name="decodeCursor"></a>
 
-## decodeCursor(cursor) ⇒ <code>DynamoDBParams</code> \| <code>undefined</code>
+## decodeCursor(cursor) ⇒ <code>Cursor</code> \| <code>undefined</code>
 **Kind**: function
 
 | Param | Type |
 | --- | --- |
-| cursor | <code>string</code> |
+| encodedCursor| <code>string</code> |
 
 <a name="DynamoDBParams"></a>
 
@@ -194,3 +200,15 @@ const result = {
 | --- | --- | --- |
 | data | <code>T</code> | The queried data |
 | meta | [<code>MetaData</code>](#MetaData) | Metadata regarding the result |
+
+## Cursor: <code>Object</code>
+**Kind**: object
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| ExclusiveStartKey | <code>any</code> | Start key for navigating DynamoDB queries |
+| previousKeys | <code>any[]</code> | Previous used ExclusiveStartKeys to navigate back to |
+| back | <code>boolean</code> | To indicate wether it's a cursor used for forward or backwards navigation |
+
+<a name="Cursor"></a>

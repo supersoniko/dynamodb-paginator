@@ -85,6 +85,12 @@ export interface IDynamoDBResult {
   ConsumedCapacity?: any;
 }
 
+export interface ICursor {
+  ExclusiveStartKey: any;
+  previousKeys?: any[]
+  back?: boolean
+}
+
 export interface IPaginatedResult<T> {
   data: T[];
   meta: IMetaData;
@@ -100,9 +106,9 @@ export interface IMetaData {
 
 export interface IPaginator {
   getPaginatedResult<T>(params: IDynamoDBParams, limit: number, result: IDynamoDBResult): IPaginatedResult<T>;
-  decodeCursor(cursor: string): IDynamoDBParams;
+  decodeCursor(cursor: string): ICursor;
 }
 
 export function paginatorFunctionFactory(): IPaginator;
 export function getPaginatedResult<T>(params: IDynamoDBParams, limit: number, result: IDynamoDBResult): IPaginatedResult<T>;
-export function decodeCursor(cursor: string): IDynamoDBParams;
+export function decodeCursor(encodedCursor: string): IDynamoDBParams;

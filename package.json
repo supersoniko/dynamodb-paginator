@@ -24,7 +24,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.17.3",
     "husky": "^2.4.1",
-    "jest": "^27.0.1",
+    "jest": "^26.5.3",
     "lint-staged": "^11.0.0",
     "sinon": "^7.3.2",
     "typescript": "^3.5.1"
