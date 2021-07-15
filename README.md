@@ -74,10 +74,10 @@ import { getPaginatedResult, decodeCursor } from 'dynamodb-paginator';
 
 const ENC_KEY = randomBytes(32); // set random encryption key
 const IV = randomBytes(16); // set random initialisation vector
-const algorithm = 'aes-256-cbc';
+const ALGORITHM = 'aes-256-cbc';
 
-const encryptedEncode = ((val) => {
-    const cipher = createCipheriv(algorithm, ENC_KEY, IV);
+const encrypt = ((val) => {
+    const cipher = createCipheriv(ALGORITHM, ENC_KEY, IV);
     let encrypted = cipher.update(JSON.stringify(val), 'utf8', 'base64');
     encrypted += cipher.final('base64');
 
@@ -85,7 +85,7 @@ const encryptedEncode = ((val) => {
 });
 
 const decrypt = ((encrypted) => {
-    const decipher = createDecipheriv('aes-256-cbc', ENC_KEY, IV);
+    const decipher = createDecipheriv(ALGORITHM, ENC_KEY, IV);
     const decrypted = decipher.update(encrypted, 'base64', 'utf8');
 
     return JSON.parse((decrypted + decipher.final('utf8')));
@@ -105,7 +105,7 @@ const result = {
 };
 
 // Pass a custom encoding function
-const paginatedResult = getPaginatedResult(params, limit, result, encryptedEncode);
+const paginatedResult = getPaginatedResult(params, limit, result, encrypt);
 
 // Pass a custom decoding function
 const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decrypt);
@@ -113,9 +113,9 @@ const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decrypt);
 console.log(decodedCursor);
 // Output:
 // {
-//     ExclusiveStartKey:{id:2},
-//     previousKeys:[{id:2}],
-//     back:false
+//     ExclusiveStartKey: {id:2},
+//     previousKeys: [{id:2}],
+//     back: false
 // }
 ```
 
