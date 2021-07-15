@@ -114,4 +114,4 @@ export type CursorDecodingFunction = (encodedCursor: string) => Cursor
 
 export function paginatorFunctionFactory(): Paginator;
 export function getPaginatedResult<T>(params: DynamoDBParams, limit: number, result: DynamoDBResult, cursorEncodingFunction?: CursorEncodingFunction): PaginatedResult<T>;
-export function decodeCursor(encodedCursor: string, cursorDecodingFunction?: CursorDecodingFunction): DynamoDBParams;
+export function decodeCursor(encodedCursor: string, cursorDecodingFunction?: CursorDecodingFunction): Cursor;

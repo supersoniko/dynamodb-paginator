@@ -3,7 +3,7 @@
   "version": "2.0.2",
   "description": "A library to help paginate dynamodb results into pages",
   "main": "index.js",
-  "types": "./index.d.ts",
+  "types": "index.d.ts",
   "scripts": {
     "test": "jest --config jest.json",
     "lint": "eslint . --fix"
