@@ -44,14 +44,14 @@ const result = await documentClient.query(queryParams);
 const paginatedResult = getPaginatedResult<User>(params, limit, result);
 // Output:
 // {
-//     data: [];
+//     data: [],
 //     meta: {
-//         limit: number;
-//         hasMoreData: boolean;
-//         cursor: string;
-//         backCursor: string;
-//         count: number;
-//     };
+//         limit: number,
+//         hasMoreData: boolean,
+//         cursor: string,
+//         backCursor: string,
+//         count: number
+//     }
 // }
 ```
 
@@ -108,9 +108,9 @@ const result = {
 const paginatedResult = getPaginatedResult(params, limit, result, encryptedEncode);
 
 // Pass a custom decoding function
-const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decrypt)
+const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decrypt);
 
-console.log(decodedCursor)
+console.log(decodedCursor);
 // Output:
 // {
 //     ExclusiveStartKey:{id:2},
