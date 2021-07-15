@@ -28,18 +28,15 @@ const standardQueryParams = {
     ExpressionAttributeValues: {
         ':id': '1'
     }
-}
+};
 // Could be a cursor from a previous paginated result
-const cursor = undefined
+const cursor = undefined;
+const paginationParams = decodeCursor(cursor) || standardQueryParams;
 
-// As of version 2.x.x decodeCursor does not return the whole query params object
-const paginationParams = decodeCursor(cursor) || {}
-const queryParams = {...standardQueryParams, ...paginationParams}
-
-const result = await documentClient.query(queryParams);
+const result = await documentClient.query(paginationParams);
 
 // By default the cursors are encoded in base64, but you can supply your own encoding function
-const paginatedResult = getPaginatedResult<User>(params, limit, result);
+const paginatedResult = getPaginatedResult<User>(paginationParams, limit, result);
 // Output:
 // {
 //     data: T[],
@@ -111,6 +108,7 @@ const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decrypt);
 console.log(decodedCursor);
 // Output:
 // {
+//     TableName: 'Users',
 //     ExclusiveStartKey: {id:2},
 //     previousKeys: [{id:2}],
 //     back: false
@@ -139,8 +137,6 @@ console.log(decodedCursor);
 <dd></dd>
 <dt><a href="#PaginatedResult">PaginatedResult</a> : <code>Object</code></dt>
 <dd></dd>
-<dt><a href="#Cursor">Cursor</a> : <code>Object</code></dt>
-<dd></dd>
 </dl>
 
 <a name="getPaginatedResult"></a>
@@ -153,7 +149,7 @@ console.log(decodedCursor);
 | params | [<code>DynamoDBParams</code>](#DynamoDBParams) |
 | limit | <code>number</code> |
 | result | [<code>DynamoDBResult</code>](#DynamoDBResult) |
-| cursorEncodingFunction? | <code>(cursor: [Cursor](#Cursor)) => string</code> |
+| cursorEncodingFunction? | <code>(cursor: [DynamoDBParams](#DynamoDBParams)) => string</code> |
 
 <a name="decodeCursor"></a>
 
@@ -163,7 +159,7 @@ console.log(decodedCursor);
 | Param | Type |
 | --- | --- |
 | encodedCursor| <code>string</code> |
-| cursorDecodingFunction? | <code>(encodedCursor: string) => [Cursor](#Cursor)</code> |
+| cursorDecodingFunction? | <code>(encodedCursor: string) => [DynamoDBParams](#DynamoDBParams)</code> |
 
 <a name="DynamoDBParams"></a>
 
@@ -228,15 +224,3 @@ console.log(decodedCursor);
 | --- | --- | --- |
 | data | <code>T</code> | The queried data |
 | meta | [<code>MetaData</code>](#MetaData) | Metadata regarding the result |
-
-## Cursor: <code>Object</code>
-**Kind**: object
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| ExclusiveStartKey | <code>any</code> | Start key for navigating DynamoDB queries |
-| previousKeys? | <code>any[]</code> | Previous used ExclusiveStartKeys to navigate back to |
-| back | <code>boolean</code> | To indicate wether it's a cursor used for forward or backwards navigation |
-
-<a name="Cursor"></a>

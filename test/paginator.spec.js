@@ -81,7 +81,8 @@ describe('DynamoDB Paginator', () => {
         ],
         meta: {
           limit,
-          cursor: 'eyJFeGNsdXNpdmVTdGFydEtleSI6eyJpZCI6Mn0sInByZXZpb3VzS2V5cyI6W3siaWQiOjJ9XSwiYmFjayI6ZmFsc2V9',
+          // eslint-disable-next-line max-len
+          cursor: 'eyJUYWJsZU5hbWUiOiJVc2VycyIsIkV4Y2x1c2l2ZVN0YXJ0S2V5Ijp7ImlkIjoyfSwicHJldmlvdXNLZXlzIjpbeyJpZCI6Mn1dLCJiYWNrIjpmYWxzZX0=',
           hasMoreData: true,
           count: 2,
         },
@@ -115,7 +116,7 @@ describe('DynamoDB Paginator', () => {
         ],
         meta: {
           limit,
-          cursor: '7b224578636c',
+          cursor: '7b225461626c',
           hasMoreData: true,
           count: 2,
         },
@@ -141,6 +142,7 @@ describe('DynamoDB Paginator', () => {
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor);
 
       expect(decodedCursor).toEqual({
+        TableName: 'Users',
         ExclusiveStartKey: { id: 2 },
         back: false,
         previousKeys: [
@@ -172,12 +174,20 @@ describe('DynamoDB Paginator', () => {
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor);
 
       expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         ExclusiveStartKey: { id: '1', date: '4' },
         previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
         back: false,
       });
 
       expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         previousKeys: [],
         back: true,
       });
@@ -208,6 +218,10 @@ describe('DynamoDB Paginator', () => {
       expect(decodedCursor).toEqual(undefined);
 
       expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         ExclusiveStartKey: { id: '1', date: '6' },
         previousKeys: [
           { id: '1', date: '2' },
@@ -242,6 +256,10 @@ describe('DynamoDB Paginator', () => {
       expect(decodedCursor).toEqual(undefined);
 
       expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         ExclusiveStartKey: { id: '1', date: '4' },
         previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
         back: true,
@@ -271,12 +289,20 @@ describe('DynamoDB Paginator', () => {
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor);
 
       expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         ExclusiveStartKey: { id: '1', date: '4' },
         previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
         back: false,
       });
 
       expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         previousKeys: [],
         back: true,
       });
@@ -309,6 +335,10 @@ describe('DynamoDB Paginator', () => {
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor);
 
       expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         ExclusiveStartKey: { id: '1', date: '8' },
         previousKeys: [
           { id: '1', date: '2' },
@@ -320,6 +350,10 @@ describe('DynamoDB Paginator', () => {
       });
 
       expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         ExclusiveStartKey: { id: '1', date: '4' },
         previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
         back: true,
@@ -351,6 +385,10 @@ describe('DynamoDB Paginator', () => {
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor);
 
       expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         previousKeys: [{ id: '1', date: '2' }],
         back: false,
         ExclusiveStartKey: { id: '1', date: '2' },
@@ -402,12 +440,20 @@ describe('DynamoDB Paginator', () => {
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decode);
 
       expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         ExclusiveStartKey: { id: '1', date: '4' },
         previousKeys: [{ id: '1', date: '2' }, { id: '1', date: '4' }],
         back: false,
       });
 
       expect(decodedBackCursor).toEqual({
+        TableName: 'Users',
+        Limit: 2,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: { ':id': '1' },
         previousKeys: [],
         back: true,
       });

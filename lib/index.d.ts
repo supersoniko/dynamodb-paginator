@@ -85,12 +85,6 @@ export interface DynamoDBResult {
   ConsumedCapacity?: any;
 }
 
-export interface Cursor {
-  ExclusiveStartKey: any;
-  previousKeys?: any[]
-  back: boolean
-}
-
 export interface PaginatedResult<T> {
   data: T[];
   meta: MetaData;
@@ -106,12 +100,12 @@ export interface MetaData {
 
 export interface Paginator {
   getPaginatedResult<T>(params: DynamoDBParams, limit: number, result: DynamoDBResult): PaginatedResult<T>;
-  decodeCursor(cursor: string): Cursor;
+  decodeCursor(cursor: string): DynamoDBParams;
 }
 
-export type CursorEncodingFunction = (cursor: Cursor) => string
-export type CursorDecodingFunction = (encodedCursor: string) => Cursor
+export type CursorEncodingFunction = (cursor: DynamoDBParams) => string
+export type CursorDecodingFunction = (encodedCursor: string) => DynamoDBParams
 
 export function paginatorFunctionFactory(): Paginator;
 export function getPaginatedResult<T>(params: DynamoDBParams, limit: number, result: DynamoDBResult, cursorEncodingFunction?: CursorEncodingFunction): PaginatedResult<T>;
-export function decodeCursor(encodedCursor: string, cursorDecodingFunction?: CursorDecodingFunction): Cursor;
+export function decodeCursor(encodedCursor: string, cursorDecodingFunction?: CursorDecodingFunction): DynamoDBParams;
