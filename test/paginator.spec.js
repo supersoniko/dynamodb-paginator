@@ -1,5 +1,14 @@
 const dynamobPaginatorFactory = require('../lib/paginator');
 
+/**
+ * @param {any} cursor
+ */
+const encode = cursor => Buffer.from(JSON.stringify(cursor)).toString('hex');
+/**
+ * @param {string} encodedCursor
+ */
+const decode = encodedCursor => JSON.parse(Buffer.from(encodedCursor, 'hex').toString());
+
 describe('DynamoDB Paginator', () => {
   const { decodeCursor, getPaginatedResult } = dynamobPaginatorFactory();
 
@@ -105,9 +114,9 @@ describe('DynamoDB Paginator', () => {
       /**
        * @param {any} cursor
        */
-      const encode = cursor => Buffer.from(JSON.stringify(cursor)).toString('hex').slice(0, 12);
+      const encode2 = cursor => Buffer.from(JSON.stringify(cursor)).toString('hex').slice(0, 12);
 
-      const paginatedResult = getPaginatedResult(params, limit, result, encode);
+      const paginatedResult = getPaginatedResult(params, limit, result, encode2);
 
       expect(paginatedResult).toEqual({
         data: [
@@ -148,6 +157,29 @@ describe('DynamoDB Paginator', () => {
         previousKeys: [
           { id: 2 },
         ],
+      });
+    });
+
+    it('should decode a cursor successfully with back navigation disabled and have no previouskeys', () => {
+      const params = { TableName: 'Users' };
+      const result = {
+        Items:
+            [
+              { id: 1, email: 'a@aap.be' },
+              { id: 2, email: 'b@aap.be' },
+            ],
+        Count: 2,
+        LastEvaluatedKey: { id: 2 },
+      };
+      const limit = 25;
+
+      const paginatedResult = getPaginatedResult(params, limit, result, encode, false);
+      const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decode);
+
+      expect(decodedCursor).toEqual({
+        TableName: 'Users',
+        ExclusiveStartKey: { id: 2 },
+        back: false,
       });
     });
 
@@ -425,15 +457,6 @@ describe('DynamoDB Paginator', () => {
       };
 
       const limit = 2;
-
-      /**
-       * @param {any} cursor
-       */
-      const encode = cursor => Buffer.from(JSON.stringify(cursor)).toString('hex');
-      /**
-       * @param {string} encodedCursor
-       */
-      const decode = encodedCursor => JSON.parse(Buffer.from(encodedCursor, 'hex').toString());
 
       const paginatedResult = getPaginatedResult(params, limit, result, encode);
       const decodedBackCursor = decodeCursor(paginatedResult.meta.backCursor, decode);

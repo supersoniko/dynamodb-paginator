@@ -121,7 +121,7 @@ console.log(decodedCursor);
 ## Functions
 
 <dl>
-<dt><a href="#getPaginatedResult">getPaginatedResult(params, limit, result, cursorEncodingFunction)</a> ⇒ <code>PaginatedResult&lt;T&gt;</code></dt>
+<dt><a href="#getPaginatedResult">getPaginatedResult(params, limit, result, cursorEncodingFunction, enableBackNavigation)</a> ⇒ <code>PaginatedResult&lt;T&gt;</code></dt>
 <dd></dd>
 <dt><a href="#decodeCursor">decodeCursor(encodedCursor, cursorDecodingFunction)</a> ⇒ <code>DynamoDBParams</code> | <code>undefined</code></dt>
 <dd></dd>
@@ -145,12 +145,13 @@ console.log(decodedCursor);
 ## getPaginatedResult(params, limit, result) ⇒ <code>PaginatedResult&lt;T&gt;</code>
 **Kind**: function
 
-| Param | Type |
-| --- | --- |
-| params | [<code>DynamoDBParams</code>](#DynamoDBParams) |
-| limit | <code>number</code> |
-| result | [<code>DynamoDBResult</code>](#DynamoDBResult) |
+| Param                   | Type                                                               |
+|-------------------------|--------------------------------------------------------------------|
+| params                  | [<code>DynamoDBParams</code>](#DynamoDBParams)                     |
+| limit                   | <code>number</code>                                                |
+| result                  | [<code>DynamoDBResult</code>](#DynamoDBResult)                     |
 | cursorEncodingFunction? | <code>(cursor: [DynamoDBParams](#DynamoDBParams)) => string</code> |
+| enableBackNavigation    | <code>boolean</code>                                               |
 
 <a name="decodeCursor"></a>
 
