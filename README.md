@@ -35,7 +35,7 @@ const defaultInput = {
 
 // Could be a cursor from a previous paginated result
 const cursor = undefined;
-const paginationInput = decodeCursor(cursor, decrypt) || defaultInput;
+const paginationInput = decodeCursor(cursor) || defaultInput;
 
 const command = new QueryCommand(paginationInput);
 
