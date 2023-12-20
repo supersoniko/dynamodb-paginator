@@ -1,6 +1,6 @@
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 
-import paginatorFunctionFactory from "../lib/paginator.ts";
+import paginatorFunctionFactory from "../lib/paginator";
 
 const encode = (cursor: Record<string, NativeAttributeValue>) =>
   Buffer.from(JSON.stringify(cursor)).toString("hex");
@@ -125,7 +125,7 @@ describe("DynamoDB Paginator", () => {
         params,
         limit,
         result,
-        encode2,
+        encode2
       );
 
       expect(paginatedResult).toEqual({
@@ -186,7 +186,7 @@ describe("DynamoDB Paginator", () => {
         limit,
         result,
         encode,
-        false,
+        false
       );
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decode);
 
@@ -509,7 +509,7 @@ describe("DynamoDB Paginator", () => {
       const paginatedResult = getPaginatedResult(params, limit, result, encode);
       const decodedBackCursor = decodeCursor(
         paginatedResult.meta.backCursor,
-        decode,
+        decode
       );
       const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decode);
 

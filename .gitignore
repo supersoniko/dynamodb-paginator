@@ -94,3 +94,6 @@ playground
 
 # Build
 .dist
+
+# Mac OS
+.DS_Store

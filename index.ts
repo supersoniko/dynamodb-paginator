@@ -1,4 +1,4 @@
-import paginatorFunctionFactory from "./lib/paginator.ts";
+import paginatorFunctionFactory from "./lib/paginator";
 
 const { getPaginatedResult, decodeCursor } = paginatorFunctionFactory();
 
