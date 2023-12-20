@@ -97,3 +97,7 @@ typings/
 jest.json
 test
 wallaby.js
+
+playground
+
+lib

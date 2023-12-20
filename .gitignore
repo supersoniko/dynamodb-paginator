@@ -88,3 +88,9 @@ typings/
 .dynamodb/
 
 .idea
+
+# Local playground
+playground
+
+# Build
+.dist

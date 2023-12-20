@@ -1,24 +1,17 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es2015",
-      "es2016.array.include",
-      "es2017.object"
-    ],
-    "noEmit": true,
-    "target": "es2018",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "lib": ["es2023"],
+    "module": "Node16",
+    "target": "es2022",
     "strict": true,
-    "allowJs": true,
-    "checkJs": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node16",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
+    "outDir": "./.dist"
   },
-  "types": [
-    "node"
-  ],
-  "include": [
-    "./lib/*.js",
-    "./lib/*.ts",
-    "./test/*.js",
-  ]
+  "include": ["lib/**/*", "index.ts"]
 }

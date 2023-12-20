@@ -1,4 +1,7 @@
 {
   "collectCoverage": true,
-  "coverageDirectory": "./coverage"
+  "coverageDirectory": "./coverage",
+  "transform": {
+    "^.+\\.tsx?$": "ts-jest"
+  }
 }
