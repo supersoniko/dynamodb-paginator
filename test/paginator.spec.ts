@@ -1,6 +1,7 @@
-import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
-
 import paginatorFunctionFactory from "../lib/paginator";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NativeAttributeValue = any;
 
 const encode = (cursor: Record<string, NativeAttributeValue>) =>
   Buffer.from(JSON.stringify(cursor)).toString("hex");
