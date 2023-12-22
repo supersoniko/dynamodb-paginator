@@ -9,8 +9,7 @@
   "scripts": {
     "test": "jest --config jest.json",
     "build": "rimraf .dist && tsc --emitDeclarationOnly --declaration && tsx build.ts",
-    "lint": "eslint . --fix",
-    "play": "tsx playground/dynamodb-test.ts"
+    "lint": "eslint . --fix"
   },
   "engines": {
     "node": ">=14.0.0"

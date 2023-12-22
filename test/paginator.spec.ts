@@ -536,5 +536,116 @@ describe("DynamoDB Paginator", () => {
         back: true,
       });
     });
+
+    it("should have a backCursor on the meta object when backNavigation is given as true", () => {
+      const params = {
+        TableName: "Users",
+        Limit: 2,
+        KeyConditionExpression: "id = :id",
+        ExpressionAttributeValues: { ":id": "1" },
+        ExclusiveStartKey: { id: "1", date: "6" },
+        previousKeys: [
+          { id: "1", date: "2" },
+          { id: "1", date: "4" },
+          { id: "1", date: "6" },
+        ],
+        back: true,
+      };
+      const result = {
+        Items: [
+          { id: "1", date: "7" },
+          { id: "1", date: "8" },
+        ],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: "1", date: "8" },
+        $metadata: {},
+      };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(
+        params,
+        limit,
+        result,
+        encode,
+        true
+      );
+
+      expect(paginatedResult.meta.backCursor).toBeDefined();
+    });
+
+    it("should have a backCursor on the meta object when backNavigation is not given", () => {
+      const params = {
+        TableName: "Users",
+        Limit: 2,
+        KeyConditionExpression: "id = :id",
+        ExpressionAttributeValues: { ":id": "1" },
+        ExclusiveStartKey: { id: "1", date: "6" },
+        previousKeys: [
+          { id: "1", date: "2" },
+          { id: "1", date: "4" },
+          { id: "1", date: "6" },
+        ],
+        back: true,
+      };
+      const result = {
+        Items: [
+          { id: "1", date: "7" },
+          { id: "1", date: "8" },
+        ],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: "1", date: "8" },
+        $metadata: {},
+      };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(
+        params,
+        limit,
+        result,
+        encode,
+        true
+      );
+
+      expect(paginatedResult.meta.backCursor).toBeDefined();
+    });
+
+    it("should not have a backCursor on the meta object when backNavigation is given as false", () => {
+      const params = {
+        TableName: "Users",
+        Limit: 2,
+        KeyConditionExpression: "id = :id",
+        ExpressionAttributeValues: { ":id": "1" },
+        ExclusiveStartKey: { id: "1", date: "6" },
+        previousKeys: [
+          { id: "1", date: "2" },
+          { id: "1", date: "4" },
+          { id: "1", date: "6" },
+        ],
+        back: true,
+      };
+      const result = {
+        Items: [
+          { id: "1", date: "7" },
+          { id: "1", date: "8" },
+        ],
+        Count: 2,
+        ScannedCount: 2,
+        LastEvaluatedKey: { id: "1", date: "8" },
+        $metadata: {},
+      };
+      const limit = 2;
+
+      const paginatedResult = getPaginatedResult(
+        params,
+        limit,
+        result,
+        encode,
+        false
+      );
+
+      expect(paginatedResult.meta.backCursor).toBeUndefined();
+    });
   });
 });

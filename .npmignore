@@ -92,12 +92,16 @@ typings/
 .circleci
 .eslintignore
 .eslintrc.js
+.eslintrc.cjs
 .huskyrc
+.husky
 .lintstagedrc
 jest.json
+tsconfig.json
 test
 wallaby.js
+build.ts
+index.ts
 
 playground
-
-./lib
+lib/
