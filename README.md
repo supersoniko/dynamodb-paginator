@@ -3,7 +3,7 @@
 ![CircleCI](https://img.shields.io/circleci/build/github/supersoniko/dynamodb-paginator.svg)
 [![codecov](https://codecov.io/gh/supersoniko/dynamodb-paginator/branch/master/graph/badge.svg)](https://codecov.io/gh/supersoniko/dynamodb-paginator)
 
-**NOTE**: This pagination library only works on indexes with a range key.
+**NOTE**: This pagination library only works on indexes with a sort key.
 
 # Usage
 
@@ -14,9 +14,9 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { QueryCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { getPaginatedResult, decodeCursor } from "dynamodb-paginator";
 
-interface User {
-  id: string;
-  name: string;
+interface UserPet {
+  userId: number; // partition key (hash)
+  petId: number; // sort key (range)
 }
 
 const client = new DynamoDBClient({});
@@ -24,11 +24,11 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const limit = 25;
 const defaultInput = {
-  TableName: "Users",
+  TableName: "UserPets",
   Limit: limit,
-  KeyConditionExpression: "id = :id",
+  KeyConditionExpression: "userId = :userId",
   ExpressionAttributeValues: {
-    ":id": "1",
+    ":userId": 1,
   },
   ConsistentRead: true,
 };
@@ -42,7 +42,7 @@ const command = new QueryCommand(paginationInput);
 const response = await docClient.send(command);
 
 // By default the cursors are encoded in base64, but you can supply your own encoding function
-const paginatedResult = getPaginatedResult<User>(
+const paginatedResult = getPaginatedResult<UserPet>(
   paginationInput,
   limit,
   response
@@ -99,16 +99,17 @@ const decrypt = (encrypted) => {
   return JSON.parse(decrypted + decipher.final("utf8"));
 };
 
-const limit = 25;
-const params = { TableName: "Users", Limit: limit };
+const limit = 2;
+const params = { TableName: "UserPets", Limit: limit };
 // Example DynamoDB Output
 const result = {
-  Items: [
-    { id: 1, email: "a@example.com" },
-    { id: 2, email: "b@example.com" },
-  ],
   Count: 2,
-  LastEvaluatedKey: { id: 2 },
+  Items: [
+    { userId: 1, petId: 1 },
+    { userId: 1, petId: 2 },
+  ],
+  LastEvaluatedKey: { userId: 1, petId: 2 },
+  ScannedCount: 2,
 };
 
 // Pass a custom encoding function
@@ -120,10 +121,10 @@ const decodedCursor = decodeCursor(paginatedResult.meta.cursor, decrypt);
 console.log(decodedCursor);
 // Output:
 // {
-//     TableName: 'Users',
-//     Limit: 25,
-//     ExclusiveStartKey: {id:2},
-//     previousKeys: [{id:2}],
-//     back: false
+//   TableName: 'UserPets',
+//   Limit: 2,
+//   ExclusiveStartKey: { userId: 1, petId: 2 },
+//   previousKeys: [ { userId: 1, petId: 2 } ],
+//   back: false
 // }
 ```
