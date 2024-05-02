@@ -107,7 +107,7 @@ describe("DynamoDB Paginator", () => {
     });
 
       it("should return a paginated list which has more pages left when using a GSI to search", () => {
-          const params = { TableName: "Users" };
+          const params = { TableName: "Users", IndexName: "GSI1" };
           const result = {
               Items: [
                   { PK: 1, SK: "2024-01-02", GSI1PK: "a@aap.be", GSI1SK: "2024-01-02" },
@@ -127,10 +127,11 @@ describe("DynamoDB Paginator", () => {
                   { PK: 2, SK: "2024-02-02", GSI1PK: "b@aap.be", GSI1SK: "2024-01-02" },
               ],
               meta: {
+                  backCursor: undefined,
                   limit,
                   // eslint-disable-next-line max-len
                   cursor:
-                      "eyJUYWJsZU5hbWUiOiJVc2VycyIsIkV4Y2x1c2l2ZVN0YXJ0S2V5Ijp7IlBLIjoyLCJTSyI6IjIwMjQtMDItMDIiLCJHU0kxUEsiOiJiQGFhcC5iZSIsIkdTSTFTSyI6IjIwMjQtMDEtMDIifSwicHJldmlvdXNLZXlzIjpbeyJQSyI6MiwiU0siOiIyMDI0LTAyLTAyIiwiR1NJMVBLIjoiYkBhYXAuYmUiLCJHU0kxU0siOiIyMDI0LTAxLTAyIn1dLCJiYWNrIjpmYWxzZX0=",
+                      "eyJUYWJsZU5hbWUiOiJVc2VycyIsIkluZGV4TmFtZSI6IkdTSTEiLCJFeGNsdXNpdmVTdGFydEtleSI6eyJQSyI6MiwiU0siOiIyMDI0LTAyLTAyIiwiR1NJMVBLIjoiYkBhYXAuYmUiLCJHU0kxU0siOiIyMDI0LTAxLTAyIn0sInByZXZpb3VzS2V5cyI6W3siUEsiOjIsIlNLIjoiMjAyNC0wMi0wMiIsIkdTSTFQSyI6ImJAYWFwLmJlIiwiR1NJMVNLIjoiMjAyNC0wMS0wMiJ9XSwiYmFjayI6ZmFsc2V9",
                   hasMoreData: true,
                   count: 2,
               },
