@@ -23,15 +23,23 @@ const encodeCursor = (
   }
 
   const referenceKey = lastEvaluatedKey || params.ExclusiveStartKey;
-  const [hashKey, sortKey] = Object.keys(referenceKey);
-  const firstKey = {
-    [hashKey]: referenceKey[hashKey],
-    [sortKey]: result.Items[0][sortKey],
-  };
-  const lastKey = {
-    [hashKey]: referenceKey[hashKey],
-    [sortKey]: result.Items[result.Items.length - 1][sortKey],
-  };
+  const keys = Object.keys(referenceKey);
+  const firstKey = keys.reduce((obj: Record<string, NativeAttributeValue>, key) => {
+    const newObj = { ...obj };
+    if (result.Items) {
+      newObj[key] = result.Items[0][key];
+    }
+    return newObj;
+  }, {});
+
+  const lastKey = keys.reduce((obj: Record<string, NativeAttributeValue>, key) => {
+    const newObj = { ...obj };
+    if (result.Items) {
+      newObj[key] = result.Items[result.Items.length - 1][key];
+    }
+    return newObj;
+  }, {});
+
   const startKey =
     !params.back || !params.backKey ? lastEvaluatedKey : firstKey;
 
