@@ -106,6 +106,38 @@ describe("DynamoDB Paginator", () => {
       });
     });
 
+      it("should return a paginated list which has more pages left when using a GSI to search", () => {
+          const params = { TableName: "Users", IndexName: "GSI1" };
+          const result = {
+              Items: [
+                  { PK: 1, SK: "2024-01-02", GSI1PK: "a@aap.be", GSI1SK: "2024-01-02" },
+                  { PK: 2, SK: "2024-02-02", GSI1PK: "b@aap.be", GSI1SK: "2024-01-02" },
+              ],
+              Count: 2,
+              LastEvaluatedKey: { PK: 2, SK: "2024-02-02", GSI1PK: "b@aap.be", GSI1SK: "2024-01-02" },
+              $metadata: {},
+          };
+          const limit = 25;
+
+          const paginatedResult = getPaginatedResult(params, limit, result);
+
+          expect(paginatedResult).toEqual({
+              data: [
+                  { PK: 1, SK: "2024-01-02", GSI1PK: "a@aap.be", GSI1SK: "2024-01-02" },
+                  { PK: 2, SK: "2024-02-02", GSI1PK: "b@aap.be", GSI1SK: "2024-01-02" },
+              ],
+              meta: {
+                  backCursor: undefined,
+                  limit,
+                  // eslint-disable-next-line max-len
+                  cursor:
+                      "eyJUYWJsZU5hbWUiOiJVc2VycyIsIkluZGV4TmFtZSI6IkdTSTEiLCJFeGNsdXNpdmVTdGFydEtleSI6eyJQSyI6MiwiU0siOiIyMDI0LTAyLTAyIiwiR1NJMVBLIjoiYkBhYXAuYmUiLCJHU0kxU0siOiIyMDI0LTAxLTAyIn0sInByZXZpb3VzS2V5cyI6W3siUEsiOjIsIlNLIjoiMjAyNC0wMi0wMiIsIkdTSTFQSyI6ImJAYWFwLmJlIiwiR1NJMVNLIjoiMjAyNC0wMS0wMiJ9XSwiYmFjayI6ZmFsc2V9",
+                  hasMoreData: true,
+                  count: 2,
+              },
+          });
+      });
+
     it("should return a paginated list which has more pages left with a custom encoding function", () => {
       const params = { TableName: "Users" };
       const result = {
